@@ -1,13 +1,9 @@
 import { ethers } from "hardhat";
 
-import {
-  compile, CompiledCopyContract,
-  copyContractConstructor,
-  copyContractFrom,
-  decodeInvocation,
-} from "../src";
+import { CopyContractFactory } from "../src";
 
 void (async () => {
+
   const {
     CONTRACT_ADDRESS: contractAddress,
     ETHERSCAN_KEY: etherscanKey,
@@ -33,53 +29,32 @@ void (async () => {
       infuraKey
     }".`);
 
-  const copyContract = await copyContractFrom({
-    contractAddress,
+  const copyContractFactory = new CopyContractFactory({
     etherscanKey,
     infuraKey,
     network: 'mainnet',
   });
 
-  const {copyContractSources, abi} = copyContract;
-
-  if (!abi)
-    throw new Error(`Expected abi, encountered "${
-      String(abi)
-    }".`);
-
-  if (!copyContractSources)
-    throw new Error(`Expected copyContractSource, encountered "${
-      String(copyContractSources)
-    }".`);
-
-
-  if (copyContractSources.length !== 1)
-    throw new Error(`Expected single copyContractSource, encountered ${
-      copyContractSources.length
-    }.`);
-
-  const {compilerOutputs} = compile({copyContract});
-
   const [wallet] = await ethers.getSigners();
 
-  for (const {compilerOutput, data} of compilerOutputs) {
-    const Contract = ethers.ContractFactory.fromSolidity(compilerOutput, wallet);
-    const deployTransaction = Contract.getDeployTransaction(
-      ...decodeInvocation({
-        data,
-        fragment: copyContractConstructor({ copyContract }),
-      }),
+  const contractFactories = await copyContractFactory.copy({
+    contractAddress,
+  });
+
+  for (const contractFactory of contractFactories) {
+
+    const contractName = contractFactory.getContractName();
+    const constructorParams = contractFactory.getConstructorParams();
+
+    const gasLimit = await wallet.estimateGas(
+      contractFactory.getDeployTransaction(...constructorParams)
     );
 
-    const gasLimit = await wallet.estimateGas(deployTransaction);
+    const contract = await contractFactory
+      .connect(wallet)
+      .deploy(...constructorParams, {gasLimit});
 
-    const tx = await wallet.sendTransaction({
-      ...deployTransaction,
-      gasLimit,
-    });
-
-    await tx.wait();
+    console.log(`Deployed ${contractName} to: ${contract.address}!`);
   }
 
-  console.log('Done!');
 })();

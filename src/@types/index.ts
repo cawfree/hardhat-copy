@@ -1,4 +1,5 @@
-import { ContractInterface } from "ethers";
+import {ContractFactory, ContractInterface} from "ethers";
+import {decodeInvocation} from "../providers";
 
 export type CopyContractSource = {
   readonly ContractName: string;
@@ -22,8 +23,11 @@ export type CopyContract = {
   readonly copyContractSources: readonly CopyContractSource[];
 };
 
-export type CompiledCopyContract = {
-  readonly name: string;
+export type CompiledCopyContract = CopyContractSource & {
   readonly compilerOutput: object;
-  readonly data: string;
+};
+
+export type CopiedContractFactory = ContractFactory & {
+  readonly getConstructorParams: () => ReturnType<typeof decodeInvocation>;
+  readonly getContractName: () => string;
 };

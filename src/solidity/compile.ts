@@ -100,9 +100,10 @@ export default config;
     );
 
     copyContractSources.forEach(
-      ({ContractName, ConstructorArguments}: CopyContractSource) => compilerOutputs.push({
-        name: ContractName,
-        data: ConstructorArguments,
+      ({ContractName, ConstructorArguments, ...extras}: CopyContractSource) => compilerOutputs.push({
+        ...extras,
+        ContractName,
+        ConstructorArguments,
         compilerOutput: JSON.parse(
           fs.readFileSync(
             path.resolve(templatePath, 'artifacts', 'contracts', `${ContractName}.sol`, `${ContractName}.json`),
@@ -114,7 +115,6 @@ export default config;
   } catch (e) {
     console.error(e);
   } finally {
-    // TODO: clear artifacts as well probably
     fs.existsSync(contractsDir) && fs.rmSync(contractsDir, {recursive: true});
     fs.existsSync(artifactsDir) && fs.rmSync(artifactsDir, {recursive: true});
     fs.existsSync(cacheDir) && fs.rmSync(cacheDir, {recursive: true});
