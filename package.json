@@ -1,0 +1,19 @@
+{
+  "name": "hardhat-project",
+  "scripts": {
+    "chain": "npx hardhat node",
+    "copy": "npx hardhat run scripts/copy.ts",
+    "test": "npx hardhat test"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^1.0.2",
+    "@types/fs-extra": "^9.0.13",
+    "dotenv": "^16.0.1",
+    "hardhat": "^2.10.1"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "fs-extra": "^10.1.0",
+    "nanoid": "3.3.4"
+  }
+}
