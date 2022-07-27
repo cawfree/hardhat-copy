@@ -51,6 +51,35 @@ const fixture = async ({contractAddress}: {
   return {copyContractFactory, contract, wallet};
 };
 
+describe("RumbleKongLeague", function() {
+  const RUMBLE_KONG_LEAGUE_MAINNET = '0xef0182dc0574cd5874494a120750fd222fdb909a';
+
+  it("public:variables", async () => {
+    const rumbleKongLeagueFixture = await fixture({
+      contractAddress: RUMBLE_KONG_LEAGUE_MAINNET,
+    });
+
+    const {contract} = rumbleKongLeagueFixture;
+
+    expect((await contract.kongPrice()).toHexString())
+      .to.eq(ethers.utils.parseEther("0.08").toHexString());
+
+    expect((await contract.maxKongPurchase()).toHexString())
+      .to.eq(ethers.BigNumber.from("20").toHexString());
+  });
+
+  it("reserveKongs:once", async () => {
+    const rumbleKongLeagueFixture = await fixture({
+      contractAddress: RUMBLE_KONG_LEAGUE_MAINNET,
+    });
+    const {contract} = rumbleKongLeagueFixture;
+
+    await contract.reserveKongs();
+
+    await expect(contract.reserveKongs()).to.eventually.be.rejectedWith(Error);
+  });
+});
+
 describe("BoredApeYachtClub", function () {
   const BORED_APE_MAINNET = '0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d';
 
