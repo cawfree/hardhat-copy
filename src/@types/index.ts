@@ -21,7 +21,6 @@ export type CopyContract = {
   readonly contractAddress: string;
   readonly network: 'mainnet';
   readonly abi: ContractInterface | null;
-  readonly bytecode: string;
   readonly copyContractSources: readonly CopyContractSource[];
 };
 

@@ -4,22 +4,15 @@ import {ethers} from "hardhat";
 
 const {
   ETHERSCAN_KEY: etherscanKey,
-  INFURA_KEY: infuraKey,
   CONTRACT_ADDRESS: contractAddress,
 } = process.env as Partial<{
   readonly ETHERSCAN_KEY: string;
-  readonly INFURA_KEY: string;
   readonly CONTRACT_ADDRESS: string;
 }>;
 
 if (typeof etherscanKey !== 'string' || !etherscanKey.length)
   throw new Error(`Expected non-empty string etherscanKey, encountered "${
    etherscanKey
-  }".`);
-
-if (typeof infuraKey !== 'string' || !infuraKey.length)
-  throw new Error(`Expected non-empty string infuraKey, encountered "${
-    infuraKey
   }".`);
 
 if (typeof contractAddress !== 'string' || !contractAddress.length)
@@ -31,7 +24,6 @@ void (async () => {
   try {
     const copyContractFactory = new CopyContractFactory({
       etherscanKey,
-      infuraKey,
       network: 'mainnet',
     });
 
@@ -39,7 +31,7 @@ void (async () => {
 
     const [contractFactory] = await copyContractFactory.copy({
       contractAddress,
-      ignoreCache: false,
+      ignoreCache: true,
     });
 
     const contractName = contractFactory.getContractName();

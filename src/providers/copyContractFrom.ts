@@ -1,4 +1,3 @@
-import { ethers } from "ethers";
 import axios from "axios";
 import fs from "fs-extra";
 import path from "path";
@@ -49,13 +48,11 @@ const getContractSourcesFromEtherscan = async ({
 export const copyContractFrom = async ({
   contractAddress,
   etherscanKey,
-  infuraKey,
   network,
   ignoreCache,
 }: {
   readonly contractAddress: string;
   readonly etherscanKey: string;
-  readonly infuraKey: string;
   readonly network: 'mainnet';
   readonly ignoreCache: boolean;
 }): Promise<CopyContract> => {
@@ -75,9 +72,7 @@ export const copyContractFrom = async ({
 
   if (!fs.existsSync(cachedCopyContract)) {
 
-    const provider = new ethers.providers.InfuraProvider(network, infuraKey);
-
-    const [abi, copyContractSources, bytecode] = await Promise.all([
+    const [abi, copyContractSources] = await Promise.all([
       getContractAbiFromEtherscan({
         contractAddress,
         etherscanKey,
@@ -86,14 +81,12 @@ export const copyContractFrom = async ({
         contractAddress,
         etherscanKey,
       }),
-      provider.getCode(contractAddress),
     ]);
 
     const nextCopyContract: CopyContract = {
       contractAddress,
       abi,
       copyContractSources,
-      bytecode,
       network,
     };
 

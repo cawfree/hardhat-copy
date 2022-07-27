@@ -7,10 +7,8 @@ import { CopyContractFactory } from "../src";
 
 const {
   ETHERSCAN_KEY: etherscanKey,
-  INFURA_KEY: infuraKey,
 } = process.env as Partial<{
   readonly ETHERSCAN_KEY: string;
-  readonly INFURA_KEY: string;
 }>;
 
 if (typeof etherscanKey !== 'string' || !etherscanKey.length)
@@ -18,17 +16,11 @@ if (typeof etherscanKey !== 'string' || !etherscanKey.length)
     etherscanKey
   }".`);
 
-if (typeof infuraKey !== 'string' || !infuraKey.length)
-  throw new Error(`Expected non-empty string infuraKey, encountered "${
-    infuraKey
-  }".`);
-
 const fixture = async ({contractAddress}: {
   readonly contractAddress: string;
 }) => {
   const copyContractFactory = new CopyContractFactory({
     etherscanKey,
-    infuraKey,
     network: 'mainnet',
   });
 

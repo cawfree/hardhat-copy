@@ -9,20 +9,16 @@ export class CopyContractFactory {
 
   /* member */
   private etherscanKey: string;
-  private infuraKey: string;
   private network: 'mainnet';
 
   constructor({
     etherscanKey,
-    infuraKey,
     network,
   }: {
     readonly etherscanKey: string;
-    readonly infuraKey: string;
     readonly network: 'mainnet';
   }) {
     this.etherscanKey = etherscanKey;
-    this.infuraKey = infuraKey;
     this.network = network;
   }
 
@@ -34,7 +30,6 @@ export class CopyContractFactory {
     const copyContract = await copyContractFrom({
       contractAddress,
       etherscanKey: this.etherscanKey,
-      infuraKey: this.infuraKey,
       network: this.network,
       ignoreCache,
     });
