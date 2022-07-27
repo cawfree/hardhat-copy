@@ -4,6 +4,8 @@ import child_process from "child_process";
 import fs from "fs-extra";
 
 import {CompiledCopyContract, CopyContract, CopyContractSource} from "../@types";
+import {copyContractPersistentIdentifier} from "../providers";
+import {artifacts} from "hardhat";
 
 const ensureTemplateDir = ({templatePath}: {
   readonly templatePath: string;
@@ -47,8 +49,15 @@ const ensureContractsDir = ({templatePath}: {
   return {contractsDir};
 };
 
-export function compile({copyContract}: {
+const accumulateCompilerOutputs = ({artifactsDir}: {
+  readonly artifactsDir: string;
+}) => {
+
+};
+
+export function compile({copyContract, ignoreCache}: {
   readonly copyContract: CopyContract;
+  readonly ignoreCache: boolean;
 }) {
 
   const compilerOutputs: CompiledCopyContract[] = [];
@@ -69,7 +78,6 @@ export function compile({copyContract}: {
   // TODO: Ensure appropriate version for all contracts.
   const [{CompilerVersion: compilerVersion}] = copyContractSources
 
-      //
   fs.writeFileSync(
     path.resolve(templatePath, 'hardhat.config.ts'),
     `
@@ -94,10 +102,26 @@ export default config;
   );
 
   try {
-    child_process.execSync(
-      'npx hardhat compile',
-      {stdio: 'inherit', cwd: templatePath}
+    const artifactsCacheDir = path.resolve(
+      os.tmpdir(),
+      copyContractPersistentIdentifier({
+        copyContract,
+        context: 'artifacts',
+      }),
     );
+
+    ignoreCache && fs.rmSync(artifactsCacheDir, {recursive: true});
+
+    if (!fs.existsSync(artifactsCacheDir)) {
+      child_process.execSync(
+        'npx hardhat compile',
+        {stdio: 'inherit', cwd: templatePath}
+      );
+
+      // After compiling, cache these results in an attempt to can skip the next iteration if possible.
+      fs.mkdirSync(artifactsCacheDir);
+      fs.copySync(artifactsDir, artifactsCacheDir, {recursive: true});
+    }
 
     copyContractSources.forEach(
       ({ContractName, ConstructorArguments, ...extras}: CopyContractSource) => compilerOutputs.push({
@@ -106,7 +130,7 @@ export default config;
         ConstructorArguments,
         compilerOutput: JSON.parse(
           fs.readFileSync(
-            path.resolve(templatePath, 'artifacts', 'contracts', `${ContractName}.sol`, `${ContractName}.json`),
+            path.resolve(artifactsCacheDir, 'contracts', `${ContractName}.sol`, `${ContractName}.json`),
             'utf-8',
           ),
         ),

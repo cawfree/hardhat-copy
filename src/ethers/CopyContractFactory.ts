@@ -26,9 +26,10 @@ export class CopyContractFactory {
     this.network = network;
   }
 
-  public async copy({contractAddress, signer}: {
+  public async copy({contractAddress, signer, ignoreCache = false}: {
     readonly contractAddress: string;
     readonly signer?: Signer;
+    readonly ignoreCache?: boolean;
   }): Promise<readonly CopiedContractFactory[]> {
     const copyContract = await copyContractFrom({
       contractAddress,
@@ -55,7 +56,10 @@ export class CopyContractFactory {
         copyContractSources.length
       }.`);
 
-    const {compilerOutputs} = compile({copyContract});
+    const {compilerOutputs} = compile({
+      copyContract,
+      ignoreCache,
+    });
 
     return compilerOutputs.map(({
       ContractName: name,

@@ -1,6 +1,7 @@
 {
   "name": "hardhat-copy",
   "scripts": {
+    "copy": "npx hardhat run scripts/copy.ts",
     "test": "npx hardhat test"
   },
   "devDependencies": {

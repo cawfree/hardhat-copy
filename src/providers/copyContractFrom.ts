@@ -65,5 +65,5 @@ export const copyContractFrom = async ({
     }),
     provider.getCode(contractAddress),
   ]);
-  return {abi, copyContractSources, bytecode};
+  return {contractAddress, abi, copyContractSources, bytecode, network};
 };
