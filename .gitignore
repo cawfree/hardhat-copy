@@ -117,3 +117,5 @@ artifacts
 #Lockfiles
 yarn.lock
 
+#WebStorm
+.idea/
