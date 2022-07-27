@@ -1,7 +1,11 @@
 import { ethers } from "ethers";
 import axios from "axios";
+import fs from "fs-extra";
+import path from "path";
+import os from "os";
 
 import { CopyContract } from "../@types";
+import {persistentIdentifier} from "./persistentIdentifier";
 
 const getContractAbiFromEtherscan = async ({contractAddress, etherscanKey}: {
   readonly contractAddress: string;
@@ -47,23 +51,54 @@ export const copyContractFrom = async ({
   etherscanKey,
   infuraKey,
   network,
+  ignoreCache,
 }: {
   readonly contractAddress: string;
   readonly etherscanKey: string;
   readonly infuraKey: string;
   readonly network: 'mainnet';
+  readonly ignoreCache: boolean;
 }): Promise<CopyContract> => {
-  const provider = new ethers.providers.InfuraProvider(network, infuraKey);
-  const [abi, copyContractSources, bytecode] = await Promise.all([
-    getContractAbiFromEtherscan({
+
+  const cachedCopyContract = path.resolve(
+    os.tmpdir(),
+    persistentIdentifier({
       contractAddress,
-      etherscanKey,
+      network,
+      context: 'copyContractFrom',
     }),
-    getContractSourcesFromEtherscan({
+  );
+
+  if (ignoreCache && fs.existsSync(cachedCopyContract)) {
+    fs.unlinkSync(cachedCopyContract);
+  }
+
+  if (!fs.existsSync(cachedCopyContract)) {
+
+    const provider = new ethers.providers.InfuraProvider(network, infuraKey);
+
+    const [abi, copyContractSources, bytecode] = await Promise.all([
+      getContractAbiFromEtherscan({
+        contractAddress,
+        etherscanKey,
+      }),
+      getContractSourcesFromEtherscan({
+        contractAddress,
+        etherscanKey,
+      }),
+      provider.getCode(contractAddress),
+    ]);
+
+    const nextCopyContract: CopyContract = {
       contractAddress,
-      etherscanKey,
-    }),
-    provider.getCode(contractAddress),
-  ]);
-  return {contractAddress, abi, copyContractSources, bytecode, network};
+      abi,
+      copyContractSources,
+      bytecode,
+      network,
+    };
+
+    fs.writeFileSync(cachedCopyContract, JSON.stringify(nextCopyContract));
+  }
+
+  return JSON.parse(fs.readFileSync(cachedCopyContract, 'utf-8')) as CopyContract;
 };

@@ -4,7 +4,7 @@ import child_process from "child_process";
 import fs from "fs-extra";
 
 import {CompiledCopyContract, CopyContract, CopyContractSource} from "../@types";
-import {copyContractPersistentIdentifier} from "../providers";
+import {persistentIdentifier} from "../providers";
 import {artifacts} from "hardhat";
 
 const ensureTemplateDir = ({templatePath}: {
@@ -47,12 +47,6 @@ const ensureContractsDir = ({templatePath}: {
   fs.mkdirSync(contractsDir);
 
   return {contractsDir};
-};
-
-const accumulateCompilerOutputs = ({artifactsDir}: {
-  readonly artifactsDir: string;
-}) => {
-
 };
 
 export function compile({copyContract, ignoreCache}: {
@@ -104,9 +98,9 @@ export default config;
   try {
     const artifactsCacheDir = path.resolve(
       os.tmpdir(),
-      copyContractPersistentIdentifier({
-        copyContract,
-        context: 'artifacts',
+      persistentIdentifier({
+        ...copyContract,
+        context: 'artifactsCacheDir',
       }),
     );
 

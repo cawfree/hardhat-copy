@@ -36,6 +36,7 @@ export class CopyContractFactory {
       etherscanKey: this.etherscanKey,
       infuraKey: this.infuraKey,
       network: this.network,
+      ignoreCache,
     });
 
     const {copyContractSources, abi} = copyContract;
