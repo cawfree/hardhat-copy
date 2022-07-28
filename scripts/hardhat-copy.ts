@@ -1,27 +1,18 @@
 #!/usr/bin/env node
 import "dotenv/config";
 
-import os from 'os';
 import path from "path";
 import {ethers} from "ethers";
 import {nanoid} from "nanoid";
 import fs from "fs-extra";
+import child_process from "child_process";
 
-import {createHardhatProject} from "../src/solidity";
-import {persistentIdentifier} from "../src/providers";
+import {ensureTemplateProject} from "../src/solidity";
 
 const argv = process.env as Partial<{
   readonly CONTRACT_ADDRESS: string;
   readonly PROJECT_NAME: string;
 }>;
-
-const ensureTemplateDir = ({templateDir}: {
-  readonly templateDir: string;
-}) => {
-  if (fs.existsSync(templateDir)) return;
-
-  createHardhatProject({hardhatProjectPath: templateDir});
-};
 
 const getProjectDir = ({maybeProjectName}: {
   readonly maybeProjectName: string | undefined;
@@ -42,18 +33,30 @@ const createTestTemplate = ({testTemplatePath, contractAddress}: {
 }) => fs.writeFileSync(
   testTemplatePath,
   `
+import "dotenv/config";
+  
 import { CopyContractFactory } from "hardhat-copy";
 import { expect } from "chai";
 import { ethers } from "hardhat";
+
+const {ETHERSCAN_KEY: etherscanKey} = process.env as Partial<{
+  readonly ETHERSCAN_KEY: string;
+}>;
+
+if (typeof etherscanKey !== 'string' || !etherscanKey.length) 
+  throw new Error(\`Expected non-empty string ETHERSCAN_KEY, encountered "\${
+    String(etherscanKey)
+  }".\`);
+
 
 describe("Test", function () {
 
   const copyContractFactory = new CopyContractFactory({
     network: 'mainnet',
-    etherscanKey: /* TODO: */,
+    etherscanKey,
   });
 
-  it("successfully copies contract from mainnet", async function () {
+  it("successfully copies and redeploys contract", async function () {
     const [signer] = await ethers.getSigners();
     
     const [contractFactory] = await copyContractFactory.copy({
@@ -100,18 +103,7 @@ void (async () => {
     if (fs.existsSync(projectDir))
       throw new Error(`Unable to initialize, target location is not empty: ${projectDir}`);
 
-    console.log('would create project at', projectDir);
-
-    const templateDir = path.resolve(
-      os.tmpdir(),
-      persistentIdentifier({
-        contractAddress: '0x000000000000000000000000000000000000dead',
-        network: 'mainnet',
-        context: 'hardhat-copy-template-dir',
-      }),
-    );
-
-    ensureTemplateDir({templateDir});
+    const {templateDir} = ensureTemplateProject({});
 
     // Copy the template into the project dir.
     fs.copySync(templateDir, projectDir, {recursive: true})
@@ -121,6 +113,12 @@ void (async () => {
       testTemplatePath: path.resolve(projectDir, 'test', 'Test.test.ts'),
       contractAddress,
     });
+
+    // Run test deployment upon completion.
+    child_process.execSync(
+      'npx hardhat test',
+      {stdio: 'inherit', cwd: projectDir}
+    );
 
   } catch (e) {
     console.error(e);

@@ -7,12 +7,12 @@ import {CompiledCopyContract, CopyContract, CopyContractSource} from "../@types"
 import {persistentIdentifier} from "../providers";
 import {artifacts} from "hardhat";
 
-import {createHardhatProject} from "./createHardhatProject";
+import {ensureTemplateProject} from "./ensureTemplateProject";
 
-const ensureContractsDir = ({templatePath}: {
-  readonly templatePath: string;
+const ensureContractsDir = ({templateDir}: {
+  readonly templateDir: string;
 }) => {
-  const contractsDir = path.resolve(templatePath, 'contracts');
+  const contractsDir = path.resolve(templateDir, 'contracts');
 
   fs.existsSync(contractsDir) && fs.rmSync(contractsDir, {recursive: true});
 
@@ -28,15 +28,15 @@ export function compile({copyContract, ignoreCache}: {
 
   const compilerOutputs: CompiledCopyContract[] = [];
 
-  const templatePath = path.resolve(os.tmpdir(), 'hardhat-copy-template');
-  const artifactsDir = path.resolve(templatePath, 'artifacts');
-  const cacheDir = path.resolve(templatePath, 'cache');
+  const {templateDir} = ensureTemplateProject({
+    ignoreCache,
+  });
 
-  !fs.existsSync(templatePath)
-    && createHardhatProject({hardhatProjectPath: templatePath});
+  const artifactsDir = path.resolve(templateDir, 'artifacts');
+  const cacheDir = path.resolve(templateDir, 'cache');
 
   const {contractsDir} = ensureContractsDir({
-    templatePath,
+    templateDir,
   });
 
   const {copyContractSources} = copyContract;
@@ -45,7 +45,7 @@ export function compile({copyContract, ignoreCache}: {
   const [{CompilerVersion: compilerVersion}] = copyContractSources
 
   fs.writeFileSync(
-    path.resolve(templatePath, 'hardhat.config.ts'),
+    path.resolve(templateDir, 'hardhat.config.ts'),
     `
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
@@ -81,7 +81,7 @@ export default config;
     if (!fs.existsSync(artifactsCacheDir)) {
       child_process.execSync(
         'npx hardhat compile',
-        {stdio: 'inherit', cwd: templatePath}
+        {stdio: 'inherit', cwd: templateDir}
       );
 
       // After compiling, cache these results in an attempt to can skip the next iteration if possible.

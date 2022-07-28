@@ -2,9 +2,12 @@
   "name": "hardhat-copy",
   "main": "dist/src",
   "scripts": {
-    "build": "rm -rf dist && tsc",
+    "build": "rm -rf dist && tsc ; chmod +x dist/scripts/hardhat-copy.js",
     "hardhat-copy": "npx ts-node scripts/hardhat-copy",
     "test": "npx hardhat test"
+  },
+  "bin": {
+    "hardhat-copy": "./dist/scripts/hardhat-copy.js"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^1.0.2",

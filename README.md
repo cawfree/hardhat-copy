@@ -2,6 +2,16 @@
 
 `hardhat-copy` helps you import an [__Ethereum__](https://ethereum.org/en/) mainnet smart contract onto your local [__Hardhat__](https://hardhat.org/) node. This helps you to rapidly experiment with real production smart contracts from the safety of your local environment and test benches; no moon-math level indexing setup necessary.
 
+## 🧪 usage
+
+To create a new Hardhat project configured to deploy and test a contract sourced from mainnet on your local environment, use the following command:
+
+```shell
+CONTRACT_ADDRESS=SOME_MAINNET_CONTRACT_ADDRESS npx hardhat-copy
+```
+
+You can `cd` into the created project and use `npx hardhat test` to execute the deployment as part of an included unit test.
+
 ## 🚀 getting started
 
 You can download the [__Node.js__](https://nodejs.org/en/) library from [__npm__](https://www.npmjs.com/):
