@@ -12,6 +12,7 @@ import {ensureTemplateProject} from "../src/solidity";
 const argv = process.env as Partial<{
   readonly CONTRACT_ADDRESS: string;
   readonly PROJECT_NAME: string;
+  readonly IGNORE_CACHE: string;
 }>;
 
 const getProjectDir = ({maybeProjectName}: {
@@ -91,7 +92,10 @@ void (async () => {
     const {
       CONTRACT_ADDRESS: contractAddress,
       PROJECT_NAME: maybeProjectName,
+      IGNORE_CACHE: maybeIgnoreCache,
     } = argv;
+
+    const ignoreCache = maybeIgnoreCache === String(true);
 
     if (typeof contractAddress !== 'string' || !ethers.utils.getAddress(contractAddress))
       throw new Error(`Expected non-empty string contract_address, encountered "${
@@ -103,7 +107,9 @@ void (async () => {
     if (fs.existsSync(projectDir))
       throw new Error(`Unable to initialize, target location is not empty: ${projectDir}`);
 
-    const {templateDir} = ensureTemplateProject({});
+    const {templateDir} = ensureTemplateProject({
+      ignoreCache,
+    });
 
     // Copy the template into the project dir.
     fs.copySync(templateDir, projectDir, {recursive: true})
