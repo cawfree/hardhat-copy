@@ -13,7 +13,7 @@ export const ensureTemplateProject = ({ignoreCache = false}: {
     persistentIdentifier({
       contractAddress: '0x000000000000000000000000000000000000dead',
       network: 'mainnet',
-      context: '::ensureTemplateProject::',
+      context: '__ensureTemplateProject__',
     }),
   );
 

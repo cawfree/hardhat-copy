@@ -46,7 +46,6 @@ export class CopyContractFactory {
         String(copyContractSources)
       }".`);
 
-
     if (copyContractSources.length !== 1)
       throw new Error(`Expected single copyContractSource, encountered ${
         copyContractSources.length

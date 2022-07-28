@@ -4,6 +4,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 
 import { CopyContractFactory } from "../src";
+import {BigNumber} from "ethers";
 
 const {
   ETHERSCAN_KEY: etherscanKey,
@@ -16,8 +17,9 @@ if (typeof etherscanKey !== 'string' || !etherscanKey.length)
     etherscanKey
   }".`);
 
-const fixture = async ({contractAddress}: {
+const fixture = async ({contractAddress, ignoreCache = false}: {
   readonly contractAddress: string;
+  readonly ignoreCache?: boolean;
 }) => {
   const copyContractFactory = new CopyContractFactory({
     etherscanKey,
@@ -28,9 +30,12 @@ const fixture = async ({contractAddress}: {
 
   const [contractFactory] = await copyContractFactory.copy({
     contractAddress,
+    ignoreCache,
   });
 
   const constructorParams = contractFactory.getConstructorParams();
+
+  console.log(constructorParams);
 
   const gasLimit = await wallet.estimateGas(
     contractFactory.getDeployTransaction(...constructorParams)
@@ -100,4 +105,17 @@ describe("BoredApeYachtClub", function () {
     // The deployer should be the owner after a successful mint.
     expect(await contract.ownerOf(0)).to.eq(wallet.address);
   });
+});
+
+describe("ReNFT", function() {
+  const RENFT_MAINNET = '0x94d8f036a0fbc216bb532d33bdf6564157af0cd7';
+
+  it("compiles-at-all", async () => {
+    const renftFixture = await fixture({
+      contractAddress: RENFT_MAINNET,
+    });
+
+    expect(true).to.eq(true);
+  });
+
 });
