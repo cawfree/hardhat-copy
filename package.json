@@ -1,6 +1,8 @@
 {
   "name": "hardhat-copy",
+  "main": "dist/src",
   "scripts": {
+    "build": "rm -rf dist && tsc",
     "copy": "npx hardhat run scripts/copy.ts",
     "test": "npx hardhat test"
   },
