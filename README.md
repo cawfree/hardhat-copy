@@ -13,6 +13,8 @@ npm i hardhat-copy
 Then you can import the `CopyContractFactory` into scripts you usually invoke using the [__HRE__](https://hardhat.org/hardhat-runner/docs/advanced/hardhat-runtime-environment). Below, we show how to automatically pull down the [__Rumble Kong League__](https://www.rumblekongleague.com/) [__smart contract__](https://etherscan.io/token/0xef0182dc0574cd5874494a120750fd222fdb909a#code).
 
 ```typescript
+import {CopyContractFactory} from "hardhat-copy";
+
 // Allocate a CopyContractFactory; this manages the process of downloading smart contracts by
 // their address and repackaging these as ethers Contracts.
 const copyContractFactory = new CopyContractFactory({
