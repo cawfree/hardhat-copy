@@ -1,6 +1,7 @@
 import fs from "fs-extra";
 import child_process from "child_process";
 import path from "path";
+import {createHardhatConfig} from "./createHardhatConfig";
 
 export const createHardhatProject = ({hardhatProjectPath}: {
   readonly hardhatProjectPath: string;
@@ -167,4 +168,6 @@ ETHERSCAN_KEY="DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW"
 }
       `.trim(),
     );
+
+  createHardhatConfig({projectDir: hardhatProjectPath});
 };

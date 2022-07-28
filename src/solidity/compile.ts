@@ -8,6 +8,7 @@ import {persistentIdentifier} from "../providers";
 import {artifacts} from "hardhat";
 
 import {ensureTemplateProject} from "./ensureTemplateProject";
+import {createHardhatConfig} from "./createHardhatConfig";
 
 const ensureContractsDir = ({templateDir}: {
   readonly templateDir: string;
@@ -44,23 +45,10 @@ export function compile({copyContract, ignoreCache}: {
   // TODO: Ensure appropriate version for all contracts.
   const [{CompilerVersion: compilerVersion}] = copyContractSources
 
-  fs.writeFileSync(
-    path.resolve(templateDir, 'hardhat.config.ts'),
-    `
-import { HardhatUserConfig } from "hardhat/config";
-import "@nomicfoundation/hardhat-toolbox";
-
-const config: HardhatUserConfig = {
-  solidity: "${
-    compilerVersion
-      .substring(0, compilerVersion.indexOf('+'))
-      .replace('v', '')
-  }",
-};
-
-export default config;
-  `.trim(),
-  );
+  createHardhatConfig({
+    projectDir: templateDir,
+    compilerVersion,
+  });
 
   copyContractSources.forEach(
     ({ContractName, SourceCode}: CopyContractSource) =>
