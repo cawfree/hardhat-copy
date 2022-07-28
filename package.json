@@ -3,7 +3,7 @@
   "main": "dist/src",
   "scripts": {
     "build": "rm -rf dist && tsc",
-    "copy": "npx hardhat run scripts/copy.ts",
+    "hardhat-copy": "npx ts-node scripts/hardhat-copy",
     "test": "npx hardhat test"
   },
   "devDependencies": {

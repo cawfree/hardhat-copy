@@ -7,35 +7,7 @@ import {CompiledCopyContract, CopyContract, CopyContractSource} from "../@types"
 import {persistentIdentifier} from "../providers";
 import {artifacts} from "hardhat";
 
-const ensureTemplateDir = ({templatePath}: {
-  readonly templatePath: string;
-}) => {
-  if (fs.existsSync(templatePath)) return;
-
-  fs.mkdirSync(templatePath);
-
-  child_process.execSync(
-    'npm i @nomicfoundation/hardhat-toolbox@^1.0.2 hardhat@^2.0.1',
-    {stdio: 'inherit', cwd: templatePath},
-  );
-
-  fs.writeFileSync(
-      path.resolve(templatePath, 'tsconfig.json'),
-      `
-{
-  "compilerOptions": {
-    "target": "es2020",
-    "module": "commonjs",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true
-  }
-}
-    `.trim(),
-
-  );
-};
+import {createHardhatProject} from "./createHardhatProject";
 
 const ensureContractsDir = ({templatePath}: {
   readonly templatePath: string;
@@ -56,12 +28,12 @@ export function compile({copyContract, ignoreCache}: {
 
   const compilerOutputs: CompiledCopyContract[] = [];
 
-  // TODO: versioning etc
   const templatePath = path.resolve(os.tmpdir(), 'hardhat-copy-template');
   const artifactsDir = path.resolve(templatePath, 'artifacts');
   const cacheDir = path.resolve(templatePath, 'cache');
 
-  ensureTemplateDir({templatePath});
+  !fs.existsSync(templatePath)
+    && createHardhatProject({hardhatProjectPath: templatePath});
 
   const {contractsDir} = ensureContractsDir({
     templatePath,
