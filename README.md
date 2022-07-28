@@ -49,5 +49,5 @@ const contract = await contractFactory
 
 [__Etherscan__](https://etherscan.io/apis) is used to download verified contract source code, which is in turn compiled on your local machine. This is because Etherscan is currently the mainstream way to share contract ABIs, which aren't published on-chain.
 
-# License
+## ✌️ License
 [__MIT__](./LICENSE)
