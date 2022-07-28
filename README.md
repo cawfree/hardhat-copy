@@ -16,13 +16,13 @@ Then you can import the `CopyContractFactory` into scripts you usually invoke us
 import {CopyContractFactory} from "hardhat-copy";
 
 // Allocate a CopyContractFactory; this manages the process of downloading smart contracts by
-// their address and repackaging these as ethers Contracts.
+// their address and repackaging these as ethers ContractFactorys.
 const copyContractFactory = new CopyContractFactory({
   etherscanKey: 'XXXXXXXXXXXXXXXXXX',
   network: 'mainnet',
 });
 
-// Semantically, multiple factories can be returned here, but for most cases you'll received the main contract.
+// Semantically, multiple factories can be returned here, but for most cases you'll receive the main contract.
 const [contractFactory] = await copyContractFactory.copy({
   contractAddress: '0xef0182dc0574cd5874494a120750fd222fdb909a',
   ignoreCache: false /* by default, artifacts are cached to greatly increase performance */,
@@ -47,7 +47,7 @@ const contract = await contractFactory
 
 ### 🤔 why do we need an etherscan key tho
 
-[__Etherscan__](https://etherscan.io/apis) is used to download verified contract source code, which is in turn compiled on your local machine. This is because Etherscan is currently the mainstream way to share contract ABIs, which by aren't published on-chain.
+[__Etherscan__](https://etherscan.io/apis) is used to download verified contract source code, which is in turn compiled on your local machine. This is because Etherscan is currently the mainstream way to share contract ABIs, which aren't published on-chain.
 
 # License
 [__MIT__](./LICENSE)
