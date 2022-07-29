@@ -20,7 +20,7 @@ export const createHardhatProject = ({
   fs.mkdirSync(contractsDir);
 
   child_process.execSync(
-    'npm i --save-dev @nomicfoundation/hardhat-toolbox@^1.0.2 hardhat@^2.0.1 dotenv hardhat-copy @openzeppelin/contracts',
+    'npm i --save-dev @nomicfoundation/hardhat-toolbox@^1.0.2 hardhat@^2.0.1 dotenv @openzeppelin/contracts',
     {stdio: 'inherit', cwd: hardhatProjectPath},
   );
 

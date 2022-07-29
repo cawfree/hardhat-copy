@@ -3,13 +3,17 @@ import {CopyContractSource, ParsedCopyContractSource} from "../@types";
 import { decodeInvocation } from "../ethers";
 import {parseSourceCode} from "./parseSourceCode";
 
-export const parseCopyContractSource = ({copyContractSource}: {
+export const parseCopyContractSource = ({copyContractSource, contractAddress}: {
   readonly copyContractSource: CopyContractSource;
+  readonly contractAddress: string;
 }): ParsedCopyContractSource => {
   const {
     ABI,
     ConstructorArguments: data,
     CompilerVersion: dangerousCompilerVersion,
+    ContractName: contractName,
+    OptimizationUsed,
+    Runs,
   } = copyContractSource;
 
   if (typeof ABI !== 'string' || !ABI.length)
@@ -31,12 +35,19 @@ export const parseCopyContractSource = ({copyContractSource}: {
   const deploymentParams = decodeInvocation({
     data,
     fragment: maybeConstructor,
-  })
+  });
+
+  const optimizer = OptimizationUsed === '1';
+  const runs = optimizer ? parseInt(Runs) : 0;
 
   return {
     abi,
+    contractAddress,
+    contractName,
     deploymentParams,
     sourceFiles: parseSourceCode({copyContractSource}),
     dangerousCompilerVersion,
+    optimizer,
+    runs,
   };
 };

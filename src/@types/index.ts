@@ -22,6 +22,10 @@ export type SourceFiles = {
 };
 
 export type ParsedCopyContractSource = {
+  readonly optimizer: boolean;
+  readonly runs: number;
+  readonly contractAddress: string;
+  readonly contractName: string;
   readonly dangerousCompilerVersion: string;
   readonly abi: ContractInterface;
   readonly sourceFiles: SourceFiles;
