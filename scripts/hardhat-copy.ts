@@ -41,7 +41,7 @@ void (async () => {
       });
     }
 
-    const targetPath = path.resolve(`HardhatCopy__contractAddress`);
+    const targetPath = path.resolve(`HardhatCopy__${contractAddress}`);
 
     if (fs.existsSync(targetPath)) {
       fs.rmSync(targetPath, {recursive: true});
