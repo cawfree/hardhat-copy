@@ -170,9 +170,9 @@ export function compile({copyContract, ignoreCache}: {
   } catch (e) {
     console.error(e);
   } finally {
-    //fs.existsSync(contractsDir) && fs.rmSync(contractsDir, {recursive: true});
-    //fs.existsSync(artifactsDir) && fs.rmSync(artifactsDir, {recursive: true});
-    //fs.existsSync(cacheDir) && fs.rmSync(cacheDir, {recursive: true});
+    fs.existsSync(contractsDir) && fs.rmSync(contractsDir, {recursive: true});
+    fs.existsSync(artifactsDir) && fs.rmSync(artifactsDir, {recursive: true});
+    fs.existsSync(cacheDir) && fs.rmSync(cacheDir, {recursive: true});
   }
 
   return {compilerOutputs};
