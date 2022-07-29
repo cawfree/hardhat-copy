@@ -3,8 +3,7 @@ import "dotenv/config";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import { CopyContractFactory } from "../src";
-import {BigNumber} from "ethers";
+import {fetchCopyContractSource, parseCopyContractSource} from "../src";
 
 const {
   ETHERSCAN_KEY: etherscanKey,
@@ -17,105 +16,96 @@ if (typeof etherscanKey !== 'string' || !etherscanKey.length)
     etherscanKey
   }".`);
 
-const fixture = async ({contractAddress, ignoreCache = false}: {
-  readonly contractAddress: string;
-  readonly ignoreCache?: boolean;
-}) => {
-  const copyContractFactory = new CopyContractFactory({
-    etherscanKey,
-    network: 'mainnet',
-  });
+const BORED_APE_MAINNET = "0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d";
+const RENFT_MAINNET = "0x94d8f036a0fbc216bb532d33bdf6564157af0cd7";
 
-  const [wallet] = await ethers.getSigners();
-
-  const [contractFactory] = await copyContractFactory.copy({
-    contractAddress,
-    ignoreCache,
-  });
-
-  const constructorParams = contractFactory.getConstructorParams();
-
-  console.log(constructorParams);
-
-  const gasLimit = await wallet.estimateGas(
-    contractFactory.getDeployTransaction(...constructorParams)
-  );
-
-  const contract = await contractFactory
-    .connect(wallet)
-    .deploy(...constructorParams, {gasLimit});
-
-  return {copyContractFactory, contract, wallet};
-};
-
-describe("RumbleKongLeague", function() {
-  const RUMBLE_KONG_LEAGUE_MAINNET = '0xef0182dc0574cd5874494a120750fd222fdb909a';
-
-  it("public:variables", async () => {
-    const rumbleKongLeagueFixture = await fixture({
-      contractAddress: RUMBLE_KONG_LEAGUE_MAINNET,
+describe("fetchCopyContractSource", () => {
+  it("BoredApeYachtClub", async () => {
+    const copyContractSource = await fetchCopyContractSource({
+      etherscanKey,
+      contractAddress: BORED_APE_MAINNET,
     });
-
-    const {contract} = rumbleKongLeagueFixture;
-
-    expect((await contract.kongPrice()).toHexString())
-      .to.eq(ethers.utils.parseEther("0.08").toHexString());
-
-    expect((await contract.maxKongPurchase()).toHexString())
-      .to.eq(ethers.BigNumber.from("20").toHexString());
+    expect(!!copyContractSource).to.eq(true);
   });
-
-  it("reserveKongs:once", async () => {
-    const rumbleKongLeagueFixture = await fixture({
-      contractAddress: RUMBLE_KONG_LEAGUE_MAINNET,
+  it("ReNFT", async () => {
+    const copyContractSource = await fetchCopyContractSource({
+      etherscanKey,
+      contractAddress: RENFT_MAINNET,
     });
-    const {contract} = rumbleKongLeagueFixture;
-
-    await contract.reserveKongs();
-
-    await expect(contract.reserveKongs()).to.eventually.be.rejectedWith(Error);
+    expect(!!copyContractSource).to.eq(true);
   });
 });
 
-describe("BoredApeYachtClub", function () {
-  const BORED_APE_MAINNET = '0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d';
-
-  it("mintApe:salesNotActive", async () => {
-
-    const boredApeFixture = await fixture({
+describe("parseCopyContractSource", () => {
+  it("BoredApeYachtClub", async () => {
+    const copyContractSources = await fetchCopyContractSource({
+      etherscanKey,
       contractAddress: BORED_APE_MAINNET,
     });
 
-    const {contract, wallet} = boredApeFixture;
+    expect(copyContractSources?.length).to.eq(1);
 
-    await expect(contract.mintApe(1)).to.eventually.be.rejectedWith(Error);
+    const [copyContractSource] = copyContractSources!;
+    const {sourceFiles} = parseCopyContractSource({copyContractSource});
 
-    // Enable sales.
-    await (contract.flipSaleState());
-
-    // Missing ETH.
-    await expect(contract.mintApe(1)).to.eventually.be.rejectedWith(Error);
-
-    // Not enough ETH.
-    await expect(contract.mintApe(1, {value: ethers.utils.parseEther("0.07")})).to.eventually.be.rejectedWith(Error);
-
-    // Should allocate a Bored Ape.
-    await contract.mintApe(1, {value: ethers.utils.parseEther("0.08")});
-
-    // The deployer should be the owner after a successful mint.
-    expect(await contract.ownerOf(0)).to.eq(wallet.address);
+    expect(!!sourceFiles['BoredApeYachtClub.sol']).to.eq(true);
   });
-});
-
-describe("ReNFT", function() {
-  const RENFT_MAINNET = '0x94d8f036a0fbc216bb532d33bdf6564157af0cd7';
-
-  it("compiles-at-all", async () => {
-    const renftFixture = await fixture({
+  it("ReNFT", async () => {
+    const copyContractSources = await fetchCopyContractSource({
+      etherscanKey,
       contractAddress: RENFT_MAINNET,
     });
 
-    expect(true).to.eq(true);
-  });
+    expect(copyContractSources?.length).to.eq(1);
 
+    const [copyContractSource] = copyContractSources!;
+    const {sourceFiles} = parseCopyContractSource({copyContractSource});
+
+    expect(Object.keys(sourceFiles))
+      .to.deep.eq(['src/ReNFT.sol', '@openzeppelin/contracts/token/ERC20/IERC20.sol', '@openzeppelin/contracts/token/ERC20/ERC20.sol', '@openzeppelin/contracts/token/ERC721/IERC721.sol', '@openzeppelin/contracts/token/ERC1155/IERC1155.sol', '@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol', '@openzeppelin/contracts/token/ERC1155/utils/ERC1155Receiver.sol', '@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol', 'src/interfaces/IResolver.sol', 'src/interfaces/IReNFT.sol', '@openzeppelin/contracts/utils/Context.sol', '@openzeppelin/contracts/utils/introspection/IERC165.sol', '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol', '@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol', '@openzeppelin/contracts/utils/introspection/ERC165.sol', '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol', '@openzeppelin/contracts/utils/Address.sol']);
+  });
 });
+
+///// Cache the dir and just execute directly via Proxy.
+//describe("BoredApeYachtClub", function () {
+//  const BORED_APE_MAINNET = '0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d';
+//
+//  it("mintApe:salesNotActive", async () => {
+//
+//    const boredApeFixture = await fixture({
+//      contractAddress: BORED_APE_MAINNET,
+//    });
+//
+//    const {contract, wallet} = boredApeFixture;
+//
+//    await expect(contract.mintApe(1)).to.eventually.be.rejectedWith(Error);
+//
+//    // Enable sales.
+//    await (contract.flipSaleState());
+//
+//    // Missing ETH.
+//    await expect(contract.mintApe(1)).to.eventually.be.rejectedWith(Error);
+//
+//    // Not enough ETH.
+//    await expect(contract.mintApe(1, {value: ethers.utils.parseEther("0.07")})).to.eventually.be.rejectedWith(Error);
+//
+//    // Should allocate a Bored Ape.
+//    await contract.mintApe(1, {value: ethers.utils.parseEther("0.08")});
+//
+//    // The deployer should be the owner after a successful mint.
+//    expect(await contract.ownerOf(0)).to.eq(wallet.address);
+//  });
+//});
+//
+////describe("ReNFT", function() {
+////  const RENFT_MAINNET = '0x94d8f036a0fbc216bb532d33bdf6564157af0cd7';
+////
+////  it("compiles-at-all", async () => {
+////    const renftFixture = await fixture({
+////      contractAddress: RENFT_MAINNET,
+////    });
+////
+////    expect(true).to.eq(true);
+////  });
+////});
+//

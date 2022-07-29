@@ -1,5 +1,5 @@
-import {ContractFactory, ContractInterface} from "ethers";
-import {decodeInvocation} from "../providers";
+import { ContractInterface } from "ethers";
+import { decodeInvocation } from "../ethers";
 
 export type CopyContractSource = {
   readonly ContractName: string;
@@ -17,18 +17,12 @@ export type CopyContractSource = {
   readonly ABI: string;
 };
 
-export type CopyContract = {
-  readonly contractAddress: string;
-  readonly network: 'mainnet';
-  readonly abi: ContractInterface | null;
-  readonly copyContractSources: readonly CopyContractSource[];
+export type SourceFiles = {
+  readonly [relativeFilePath: string]: string;
 };
 
-export type CompiledCopyContract = CopyContractSource & {
-  readonly compilerOutput: object;
-};
-
-export type CopiedContractFactory = ContractFactory & {
-  readonly getConstructorParams: () => ReturnType<typeof decodeInvocation>;
-  readonly getContractName: () => string;
+export type ParsedCopyContractSource = {
+  readonly abi: ContractInterface;
+  readonly sourceFiles: SourceFiles;
+  readonly deploymentParams: ReturnType<typeof decodeInvocation>;
 };
