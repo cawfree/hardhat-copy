@@ -9,10 +9,16 @@ export const parseCopyContractSource = ({copyContractSource}: {
   const {
     ABI,
     ConstructorArguments: data,
+    CompilerVersion: dangerousCompilerVersion,
   } = copyContractSource;
 
   if (typeof ABI !== 'string' || !ABI.length)
     throw new Error(`Expected non-empty string ABI, encountered "${String(ABI)}".`);
+
+  if (typeof dangerousCompilerVersion !== 'string' || !dangerousCompilerVersion.length)
+    throw new Error(`Expected non-empty string dangerousCompilerVersion, encountered "${
+      String(dangerousCompilerVersion)
+    }".`);
 
   const abi = JSON.parse(ABI) as ContractInterface;
 
@@ -31,5 +37,6 @@ export const parseCopyContractSource = ({copyContractSource}: {
     abi,
     deploymentParams,
     sourceFiles: parseSourceCode({copyContractSource}),
+    dangerousCompilerVersion,
   };
 };

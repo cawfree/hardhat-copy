@@ -22,6 +22,7 @@ export type SourceFiles = {
 };
 
 export type ParsedCopyContractSource = {
+  readonly dangerousCompilerVersion: string;
   readonly abi: ContractInterface;
   readonly sourceFiles: SourceFiles;
   readonly deploymentParams: ReturnType<typeof decodeInvocation>;

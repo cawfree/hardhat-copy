@@ -1,9 +1,18 @@
 import "dotenv/config";
 
-import { expect } from "chai";
-import { ethers } from "hardhat";
+import os from "os";
+import path from "path";
+import fs from "fs-extra";
 
-import {fetchCopyContractSource, parseCopyContractSource} from "../src";
+import { expect } from "chai";
+
+import {
+  fetchCopyContractSource,
+  parseCopyContractSource,
+  keccakString,
+  createHardhatProject,
+  cloneHardhatProjectWithParsedCopyContractSource,
+} from "../src";
 
 const {
   ETHERSCAN_KEY: etherscanKey,
@@ -63,6 +72,59 @@ describe("parseCopyContractSource", () => {
 
     expect(Object.keys(sourceFiles))
       .to.deep.eq(['src/ReNFT.sol', '@openzeppelin/contracts/token/ERC20/IERC20.sol', '@openzeppelin/contracts/token/ERC20/ERC20.sol', '@openzeppelin/contracts/token/ERC721/IERC721.sol', '@openzeppelin/contracts/token/ERC1155/IERC1155.sol', '@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol', '@openzeppelin/contracts/token/ERC1155/utils/ERC1155Receiver.sol', '@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol', 'src/interfaces/IResolver.sol', 'src/interfaces/IReNFT.sol', '@openzeppelin/contracts/utils/Context.sol', '@openzeppelin/contracts/utils/introspection/IERC165.sol', '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol', '@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol', '@openzeppelin/contracts/utils/introspection/ERC165.sol', '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol', '@openzeppelin/contracts/utils/Address.sol']);
+  });
+});
+
+describe("createHardhatProject", () => {
+  const hardhatProjectTemplatePath = path.resolve(
+    os.tmpdir(),
+    keccakString("hardhat-copy/test/createHardhatProject")
+  );
+  it("createHardhatProject", () => {
+    const {testDir, contractsDir} = createHardhatProject({
+      hardhatProjectPath: hardhatProjectTemplatePath,
+    });
+    expect(fs.existsSync(hardhatProjectTemplatePath)).to.eq(true);
+    expect(fs.existsSync(testDir)).to.eq(true);
+    expect(fs.existsSync(contractsDir)).to.eq(true);
+  });
+  it("cloneHardhatProjectWithParsedCopyContractSource:BoredApeYachtClub", async () => {
+    const targetPath = path.resolve(
+      os.tmpdir(),
+      keccakString("hardhat-copy/test/cloneHardhatProjectWithParsedCopyContractSource:BoredApeYachtClub")
+    );
+
+    const copyContractSources = await fetchCopyContractSource({
+      etherscanKey,
+      contractAddress: BORED_APE_MAINNET,
+    });
+
+    const [copyContractSource] = copyContractSources!;
+
+    cloneHardhatProjectWithParsedCopyContractSource({
+      hardhatProjectTemplatePath,
+      targetPath,
+      parsedCopyContractSource: parseCopyContractSource({copyContractSource}),
+    });
+  });
+  it("cloneHardhatProjectWithParsedCopyContractSource:ReNFT", async () => {
+    const targetPath = path.resolve(
+      os.tmpdir(),
+      keccakString("hardhat-copy/test/cloneHardhatProjectWithParsedCopyContractSource:ReNFT")
+    );
+
+    const copyContractSources = await fetchCopyContractSource({
+      etherscanKey,
+      contractAddress: RENFT_MAINNET,
+    });
+
+    const [copyContractSource] = copyContractSources!;
+
+    cloneHardhatProjectWithParsedCopyContractSource({
+      hardhatProjectTemplatePath,
+      targetPath,
+      parsedCopyContractSource: parseCopyContractSource({copyContractSource}),
+    });
   });
 });
 
