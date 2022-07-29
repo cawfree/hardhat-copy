@@ -1,22 +1,33 @@
 import fs from "fs-extra";
 import child_process from "child_process";
 import path from "path";
+import {forceMkdir} from "../fs";
+import {AUSTIN_GRIFFITHS_ETHERSCAN_KEY} from "../constants";
 import {createHardhatConfig} from "./createHardhatConfig";
 
-export const createHardhatProject = ({hardhatProjectPath}: {
+export const createHardhatProject = ({
+  compilerVersion,
+  hardhatProjectPath,
+}: {
+  readonly compilerVersion?: string;
   readonly hardhatProjectPath: string;
 }) => {
-  fs.mkdirSync(hardhatProjectPath);
-  fs.mkdirSync(path.resolve(hardhatProjectPath, 'test'));
+  forceMkdir({dir: hardhatProjectPath});
+
+  const testDir = path.resolve(hardhatProjectPath, 'test');
+  const contractsDir = path.resolve(hardhatProjectPath, 'contracts');
+
+  fs.mkdirSync(testDir);
+  fs.mkdirSync(contractsDir);
 
   child_process.execSync(
-    'npm i --save-dev @nomicfoundation/hardhat-toolbox@^1.0.2 hardhat@^2.0.1 dotenv hardhat-copy @openzeppelin/contracts',
+    'npm i --save-dev @nomicfoundation/hardhat-toolbox@^1.0.2 hardhat@^2.0.1 dotenv @openzeppelin/contracts',
     {stdio: 'inherit', cwd: hardhatProjectPath},
   );
 
   fs.writeFileSync(
     path.resolve(hardhatProjectPath, '.gitignore'),
-      `
+    `
 # Logs
 logs
 *.log
@@ -138,7 +149,7 @@ yarn.lock
 #WebStorm
 .idea/
       `.trim(),
-  );
+    );
 
   fs.writeFileSync(
     path.resolve(hardhatProjectPath, '.npmignore'),
@@ -146,10 +157,10 @@ yarn.lock
   );
 
   fs.writeFileSync(
-      path.resolve(hardhatProjectPath, '.env'),
-      `
+    path.resolve(hardhatProjectPath, '.env'),
+    `
 # Please use your own key!
-ETHERSCAN_KEY="DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW"
+ETHERSCAN_KEY="${AUSTIN_GRIFFITHS_ETHERSCAN_KEY}"
 `.trim(),
   );
 
@@ -166,8 +177,13 @@ ETHERSCAN_KEY="DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW"
     "skipLibCheck": true
   }
 }
-      `.trim(),
-    );
+    `.trim(),
+  );
 
-  createHardhatConfig({projectDir: hardhatProjectPath});
+  createHardhatConfig({
+    compilerVersion,
+    projectDir: hardhatProjectPath,
+  });
+
+  return {testDir, contractsDir};
 };
