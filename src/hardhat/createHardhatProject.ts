@@ -1,8 +1,9 @@
 import fs from "fs-extra";
 import child_process from "child_process";
 import path from "path";
-import {createHardhatConfig} from "./createHardhatConfig";
 import {forceMkdir} from "../fs";
+import {AUSTIN_GRIFFITHS_ETHERSCAN_KEY} from "../constants";
+import {createHardhatConfig} from "./createHardhatConfig";
 
 export const createHardhatProject = ({
   compilerVersion,
@@ -159,7 +160,7 @@ yarn.lock
     path.resolve(hardhatProjectPath, '.env'),
     `
 # Please use your own key!
-ETHERSCAN_KEY="DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW"
+ETHERSCAN_KEY="${AUSTIN_GRIFFITHS_ETHERSCAN_KEY}"
 `.trim(),
   );
 

@@ -11,7 +11,7 @@ import {
   parseCopyContractSource,
   keccakString,
   createHardhatProject,
-  cloneHardhatProjectWithParsedCopyContractSource,
+  copyProject,
 } from "../src";
 
 const {
@@ -99,43 +99,23 @@ describe("createHardhatProject", () => {
       os.tmpdir(),
       keccakString("hardhat-copy/test/cloneHardhatProjectWithParsedCopyContractSource:BoredApeYachtClub")
     );
-
-    const copyContractSources = await fetchCopyContractSource({
+    await copyProject({
+      hardhatProjectTemplatePath,
+      targetPath,
       etherscanKey,
       contractAddress: BORED_APE_MAINNET,
     });
-
-    const [copyContractSource] = copyContractSources!;
-
-    cloneHardhatProjectWithParsedCopyContractSource({
-      hardhatProjectTemplatePath,
-      targetPath,
-      parsedCopyContractSource: parseCopyContractSource({
-        copyContractSource,
-        contractAddress: BORED_APE_MAINNET,
-      }),
-    });
   });
-  it("cloneHardhatProjectWithParsedCopyContractSource:ReNFT", async () => {
+  it("copyProject:ReNFT", async () => {
     const targetPath = path.resolve(
       os.tmpdir(),
       keccakString("hardhat-copy/test/cloneHardhatProjectWithParsedCopyContractSource:ReNFT")
     );
-
-    const copyContractSources = await fetchCopyContractSource({
-      etherscanKey,
-      contractAddress: RENFT_MAINNET,
-    });
-
-    const [copyContractSource] = copyContractSources!;
-
-    cloneHardhatProjectWithParsedCopyContractSource({
+    await copyProject({
       hardhatProjectTemplatePath,
       targetPath,
-      parsedCopyContractSource: parseCopyContractSource({
-        copyContractSource,
-        contractAddress: RENFT_MAINNET,
-      }),
+      etherscanKey,
+      contractAddress: RENFT_MAINNET,
     });
   });
 });
