@@ -11,7 +11,7 @@ import {
   parseCopyContractSource,
   keccakString,
   createHardhatProject,
-  copyProject,
+  copyProject, getSafeCompilerVersion,
 } from "../src";
 
 const {
@@ -27,6 +27,11 @@ if (typeof etherscanKey !== 'string' || !etherscanKey.length)
 
 const BORED_APE_MAINNET = "0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d";
 const RENFT_MAINNET = "0x94d8f036a0fbc216bb532d33bdf6564157af0cd7";
+
+describe("hardhat", () => {
+  expect(getSafeCompilerVersion({compilerVersion: '0.8.9'}))
+    .to.equal('0.8.9');
+});
 
 describe("fetchCopyContractSource", () => {
   it("BoredApeYachtClub", async () => {
